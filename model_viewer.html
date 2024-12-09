@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GLB Viewer</title>
+    <style>
+        body { margin: 0; }
+        #container { 
+            width: 100vw; 
+            height: 100vh; 
+            position: relative;
+            background: #f0f0f0;
+        }
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #loadButton {
+            margin-left: 10px;
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #loadButton:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        #fileName {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        #progressContainer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        #progressBar {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        #progressFill {
+            width: 0%;
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.3s ease;
+        }
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="controls">
+            <input type="file" id="fileInput" accept=".glb" />
+            <button id="loadButton" disabled>Load Model</button>
+            <div id="fileName"></div>
+        </div>
+        <div id="progressContainer">
+            <div>Loading Model...</div>
+            <div id="progressBar">
+                <div id="progressFill"></div>
+            </div>
+        </div>
+        <div id="instructions">
+            Left click + drag to rotate | Right click + drag to pan | Scroll to zoom
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        let scene, camera, renderer, controls, currentModel;
+        let selectedFile = null;
+
+        // Initialize the scene
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0xf0f0f0);
+            document.getElementById('container').appendChild(renderer.domElement);
+
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            // Setup camera position
+            camera.position.z = 5;
+
+            // Add OrbitControls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            // Handle window resizing
+            window.addEventListener('resize', onWindowResize, false);
+
+            // Start animation loop
+            animate();
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Load GLB file
+        function loadGLB(file) {
+            const loader = new GLTFLoader();
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            
+            // Show progress container
+            progressContainer.style.display = 'block';
+
+            // Create a URL for the file
+            const url = URL.createObjectURL(file);
+
+            // Remove previous model if it exists
+            if (currentModel) {
+                scene.remove(currentModel);
+            }
+
+            // Load the model
+            loader.load(
+                url,
+                function (gltf) {
+                    // Hide progress container
+                    progressContainer.style.display = 'none';
+                    
+                    currentModel = gltf.scene;
+                    scene.add(currentModel);
+
+                    // Center and scale the model
+                    const box = new THREE.Box3().setFromObject(currentModel);
+                    const center = box.getCenter(new THREE.Vector3());
+                    const size = box.getSize(new THREE.Vector3());
+                    
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const scale = 3 / maxDim;
+                    currentModel.scale.setScalar(scale);
+                    
+                    currentModel.position.sub(center.multiplyScalar(scale));
+                    
+                    // Reset camera and controls
+                    camera.position.set(0, 0, 5);
+                    controls.reset();
+                },
+                function (xhr) {
+                    // Update progress bar
+                    const percent = (xhr.loaded / xhr.total) * 100;
+                    progressFill.style.width = percent + '%';
+                },
+                function (error) {
+                    console.error('Error loading GLB:', error);
+                    progressContainer.style.display = 'none';
+                    alert('Error loading GLB file. Please try again.');
+                }
+            );
+
+            // Clean up the URL
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize the scene
+        init();
+
+        // Handle file selection
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedFile = file;
+                document.getElementById('fileName').textContent = `Selected: ${file.name}`;
+                document.getElementById('loadButton').disabled = false;
+            } else {
+                selectedFile = null;
+                document.getElementById('fileName').textContent = '';
+                document.getElementById('loadButton').disabled = true;
+            }
+        });
+
+        // Handle load button click
+        document.getElementById('loadButton').addEventListener('click', function() {
+            if (selectedFile) {
+                loadGLB(selectedFile);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GLB First Person Viewer</title>
+    <style>
+        body { margin: 0; }
+        #container { 
+            width: 100vw; 
+            height: 100vh; 
+            position: relative;
+            background: #f0f0f0;
+        }
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #loadButton {
+            margin-left: 10px;
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #loadButton:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        #fileName {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        #progressContainer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        #progressBar {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        #progressFill {
+            width: 0%;
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.3s ease;
+        }
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="controls">
+            <input type="file" id="fileInput" accept=".glb" />
+            <button id="loadButton" disabled>Load Model</button>
+            <div id="fileName"></div>
+        </div>
+        <div id="progressContainer">
+            <div>Loading Model...</div>
+            <div id="progressBar">
+                <div id="progressFill"></div>
+            </div>
+        </div>
+        <div id="instructions">
+            WASD keys to move | Mouse to look around
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        let scene, camera, renderer, controls, currentModel;
+        let selectedFile = null;
+        let moveForward = false;
+        let moveBackward = false;
+        let moveLeft = false;
+        let moveRight = false;
+        let canJump = false;
+
+        const velocity = new THREE.Vector3();
+        const direction = new THREE.Vector3();
+        const MOVE_SPEED = 5.0;
+        const EYE_HEIGHT = 1.6; // Average human eye height in meters
+
+        // Initialize the scene
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0xf0f0f0);
+            document.getElementById('container').appendChild(renderer.domElement);
+
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            // Setup camera position at eye level
+            camera.position.y = EYE_HEIGHT;
+
+            // Setup first-person controls
+            controls = new PointerLockControls(camera, document.body);
+
+            // Add click-to-start
+            renderer.domElement.addEventListener('click', function() {
+                controls.lock();
+            });
+
+            // Handle keyboard controls
+            document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('keyup', onKeyUp);
+
+            // Handle window resizing
+            window.addEventListener('resize', onWindowResize, false);
+
+            // Start animation loop
+            animate();
+        }
+
+        function onKeyDown(event) {
+            switch (event.code) {
+                case 'KeyW':
+                case 'ArrowUp':
+                    moveForward = true;
+                    break;
+                case 'KeyS':
+                case 'ArrowDown':
+                    moveBackward = true;
+                    break;
+                case 'KeyA':
+                case 'ArrowLeft':
+                    moveLeft = true;
+                    break;
+                case 'KeyD':
+                case 'ArrowRight':
+                    moveRight = true;
+                    break;
+            }
+        }
+
+        function onKeyUp(event) {
+            switch (event.code) {
+                case 'KeyW':
+                case 'ArrowUp':
+                    moveForward = false;
+                    break;
+                case 'KeyS':
+                case 'ArrowDown':
+                    moveBackward = false;
+                    break;
+                case 'KeyA':
+                case 'ArrowLeft':
+                    moveLeft = false;
+                    break;
+                case 'KeyD':
+                case 'ArrowRight':
+                    moveRight = false;
+                    break;
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (controls.isLocked) {
+                const delta = 0.016; // Assume 60fps
+
+                velocity.x = 0;
+                velocity.z = 0;
+
+                direction.z = Number(moveForward) - Number(moveBackward);
+                direction.x = Number(moveRight) - Number(moveLeft);
+                direction.normalize();
+
+                if (moveForward || moveBackward) {
+                    velocity.z -= direction.z * MOVE_SPEED * delta;
+                }
+                if (moveLeft || moveRight) {
+                    velocity.x -= direction.x * MOVE_SPEED * delta;
+                }
+
+                controls.moveRight(-velocity.x);
+                controls.moveForward(-velocity.z);
+
+                // Keep camera at eye level
+                camera.position.y = EYE_HEIGHT;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Load GLB file
+        function loadGLB(file) {
+            const loader = new GLTFLoader();
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            
+            progressContainer.style.display = 'block';
+
+            const url = URL.createObjectURL(file);
+
+            if (currentModel) {
+                scene.remove(currentModel);
+            }
+
+            loader.load(
+                url,
+                function (gltf) {
+                    progressContainer.style.display = 'none';
+                    
+                    currentModel = gltf.scene;
+                    scene.add(currentModel);
+
+                    // Center the model
+                    const box = new THREE.Box3().setFromObject(currentModel);
+                    const center = box.getCenter(new THREE.Vector3());
+                    const size = box.getSize(new THREE.Vector3());
+                    
+                    currentModel.position.x = -center.x;
+                    currentModel.position.z = -center.z;
+                    
+                    // Reset camera to a good starting position
+                    camera.position.set(size.x / 2, EYE_HEIGHT, size.z / 2);
+                },
+                function (xhr) {
+                    const percent = (xhr.loaded / xhr.total) * 100;
+                    progressFill.style.width = percent + '%';
+                },
+                function (error) {
+                    console.error('Error loading GLB:', error);
+                    progressContainer.style.display = 'none';
+                    alert('Error loading GLB file. Please try again.');
+                }
+            );
+
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize the scene
+        init();
+
+        // Handle file selection
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedFile = file;
+                document.getElementById('fileName').textContent = `Selected: ${file.name}`;
+                document.getElementById('loadButton').disabled = false;
+            } else {
+                selectedFile = null;
+                document.getElementById('fileName').textContent = '';
+                document.getElementById('loadButton').disabled = true;
+            }
+        });
+
+        // Handle load button click
+        document.getElementById('loadButton').addEventListener('click', function() {
+            if (selectedFile) {
+                loadGLB(selectedFile);
+            }
+        });
+    </script>
+</body>
+</html>
