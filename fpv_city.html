@@ -13,7 +13,7 @@
             </div>
         </div>
         <div id="instructions">
-            WASD keys to move | Mouse to look around
+            WASD keys to move | Mouse to look around | Left Click to shoot plasma
         </div>
     </div>
 
@@ -58,6 +58,11 @@
             renderer.domElement.addEventListener('click', () => controls.lock());
             document.addEventListener('keydown', (e) => physicsController.onKeyDown(e));
             document.addEventListener('keyup', (e) => physicsController.onKeyUp(e));
+            document.addEventListener('mousedown', (e) => {
+                if (controls.isLocked) {
+                    physicsController.onMouseClick(e);
+                }
+            });
             window.addEventListener('resize', onWindowResize, false);
 
             loadGLB();
