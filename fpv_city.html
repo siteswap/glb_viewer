@@ -81,6 +81,40 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
+        function loadMobiusRings(citySize) {
+            const loader = new GLTFLoader();
+            loader.load(
+                'static/glb/mobius.glb',
+                function (gltf) {
+                    const mobiusModel = gltf.scene;
+                    
+                    // Get original size to calculate scale
+                    const box = new THREE.Box3().setFromObject(mobiusModel);
+                    const size = box.getSize(new THREE.Vector3());
+                    const scale = 1 / size.x; // Scale to make width = 1
+                    
+                    // Create 5 instances
+                    for (let i = 0; i < 50; i++) {
+                        const instance = mobiusModel.clone();
+                        
+                        // Scale uniformly to maintain proportions
+                        instance.scale.set(scale, scale, scale);
+                        
+                        // Random position within city bounds
+                        const x = (Math.random() - 0.5) * citySize.x;
+                        const z = (Math.random() - 0.5) * citySize.z;
+                        instance.position.set(x, 1.8, z);
+                        
+                        scene.add(instance);
+                    }
+                },
+                undefined,
+                function (error) {
+                    console.error('Error loading mobius GLB:', error);
+                }
+            );
+        }
+
         function loadGLB() {
             const loader = new GLTFLoader();
             const progressContainer = document.getElementById('progressContainer');
@@ -108,6 +142,9 @@
                     currentModel.position.z = -center.z;
                     
                     camera.position.set(size.x / 2, 1.8, size.z / 2);
+
+                    // Load mobius rings after city is loaded and positioned
+                    loadMobiusRings(size);
                 },
                 function (xhr) {
                     const percent = (xhr.loaded / xhr.total) * 100;
