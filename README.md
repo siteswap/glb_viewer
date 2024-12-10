@@ -1,13 +1,20 @@
 
-Whichever file you want to view, name it index.html (it doesnt work otherwise, dont know why).
-
-Host the index.html file with the following command running in the same directory as index.html:
+Run this command in the project root directory, then select which page you want:
 	python -m http.server
 
+TIP: Keep each file small and modular, so that Claude/GPTo1 can keep writing all the code!
+
+
+TODO:
+	1) Move physicsController to it's own file/module (reduces context for Claude/GPT)
+	2) With this as new base, create a game with fixed loading of town4new and mobius (deco the loading feature)
+		
+
 IDEAS:
-	Split the file up so Claude can continue to handle it.
-	Add smart-trainer controls 
-	Host a choice of glb models
-	Follow the variable road height (how?)
-	Dont allow passing through walls (cannon.js collision physics?)
-	Simple monster shooting? (Is this available somewhere already?)
+	Add smart-trainer controls:
+		- Bluetooth zwifthub for speed
+		- Gyroscope for steering (also buttons incase that doesn't work well)
+
+	Collect the loops to win in record time!
+	Shoot the loops if you charge up by peddaling hard.
+
