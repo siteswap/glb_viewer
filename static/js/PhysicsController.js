@@ -223,7 +223,7 @@ export class PhysicsController {
                 continue;
             }
 
-            // Optional: Check for collisions with objects
+            // Check for collisions with objects
             const plasmaRaycaster = new THREE.Raycaster(
                 plasma.position,
                 plasma.velocity.clone().normalize(),
@@ -232,6 +232,18 @@ export class PhysicsController {
             );
             const intersects = plasmaRaycaster.intersectObjects(collidableMeshes);
             if (intersects.length > 0) {
+                // Check if the intersected object is a mobius ring
+                const hitObject = intersects[0].object;
+                const mobiusIndex = this.mobiusRings.findIndex(ring => ring === hitObject || ring.children.includes(hitObject));
+                
+                if (mobiusIndex !== -1) {
+                    // Remove the mobius ring
+                    const mobiusRing = this.mobiusRings[mobiusIndex];
+                    this.scene.remove(mobiusRing);
+                    this.mobiusRings.splice(mobiusIndex, 1);
+                }
+
+                // Remove the plasma blast
                 this.scene.remove(plasma);
                 this.plasmaBlasts.splice(i, 1);
             }
