@@ -7,6 +7,7 @@ export class PhysicsController {
         this.scene = scene;
         this.plasmaBlasts = [];
         this.mobiusRings = [];
+        this.score = 0;
         this.moveSpeed = 5.0;
         this.verticalOffset = 1.8;
         this.gravity = -9.8;
@@ -240,6 +241,7 @@ export class PhysicsController {
                     // Remove the mobius ring
                     const mobiusRing = this.mobiusRings[mobiusIndex];
                     this.scene.remove(mobiusRing);
+                    this.score += 1;
                     this.mobiusRings.splice(mobiusIndex, 1);
                 }
 

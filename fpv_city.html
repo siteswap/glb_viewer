@@ -13,6 +13,7 @@
             </div>
         </div>
         <div id="instructions">
+            <div id="scoreDisplay">Score: 0</div>
             WASD keys to move | Mouse to look around | Left Click to shoot plasma
         </div>
     </div>
@@ -75,6 +76,7 @@
             
             if (controls.isLocked) {
                 physicsController.update(deltaTime);
+                document.getElementById('scoreDisplay').textContent = `Score: ${physicsController.score}`;
             }
 
             renderer.render(scene, camera);
