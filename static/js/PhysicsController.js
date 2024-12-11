@@ -4,10 +4,14 @@ export class PhysicsController {
     constructor(camera, scene) {
         this.camera = camera;
         this.scene = scene;
+        this.plasmaBlasts = [];
+        // TODO - where are the mobius rings? All other components are here.
         this.moveSpeed = 5.0;
         this.verticalOffset = 1.8;
         this.gravity = -9.8;
         this.velocity = new THREE.Vector3();
+        this.plasmaSpeed = 30.0;
+        this.plasmaLifetime = 2.0; // seconds
         
         this.groundRaycaster = new THREE.Raycaster();
         this.groundRaycaster.ray.direction.set(0, -1, 0);
@@ -30,11 +34,6 @@ export class PhysicsController {
         this.moveBackward = false;
         this.moveLeft = false;
         this.moveRight = false;
-
-        // Plasma blast properties
-        this.plasmaBlasts = [];
-        this.plasmaSpeed = 30.0;
-        this.plasmaLifetime = 2.0; // seconds
     }
 
     createPlasmaBlast() {
