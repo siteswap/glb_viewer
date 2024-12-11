@@ -14,10 +14,10 @@ export class PhysicsController {
         
         this.collisionRaycasters = [];
         const rayDirections = [
-            new THREE.Vector3(1, 0, 0),
-            new THREE.Vector3(-1, 0, 0),
-            new THREE.Vector3(0, 0, 1),
-            new THREE.Vector3(0, 0, -1),
+            new THREE.Vector3(1, 0, 0),  // Positive x-axis (right)
+            new THREE.Vector3(-1, 0, 0), // Negative x-axis (left)
+            new THREE.Vector3(0, 0, 1),  // Positive z-axis (forward)
+            new THREE.Vector3(0, 0, -1), // Negative z-axis (backward) 
         ];
         
         rayDirections.forEach(direction => {
