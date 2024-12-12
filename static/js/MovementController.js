@@ -72,11 +72,7 @@ export class MovementController {
     }
 
     onCyclingPower(watts) {
-        if (watts > 49) {
-            this.moveForward = true;
-        } else {
-            this.moveForward = false;
-        }
+        this.moveForward = watts > 19;
     }
 
     update(deltaTime, collidableMeshes) {
