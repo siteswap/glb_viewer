@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .control-btn {
-            padding: 15px 30px;
+            padding: 30px 60px;
             font-size: 24px;
             border: none;
             border-radius: 5px;
@@ -15,11 +15,8 @@
             cursor: pointer;
             touch-action: manipulation;
         }
-        .control-btn:active {
-            background: rgba(0, 0, 0, 0.9);
-        }
         .control-btn.active {
-            background: rgba(255, 0, 0, 0.7);
+            background: rgba(255, 0, 0, 0.4);
         }
         .stats-container {
             display: flex;
@@ -29,15 +26,13 @@
         #turnLeft {
             position: fixed;
             left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
+            bottom: 20px;
             z-index: 1000;
         }
         #turnRight {
             position: fixed;
             right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
+            bottom: 20px;
             z-index: 1000;
         }
     </style>
