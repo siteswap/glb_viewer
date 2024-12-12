@@ -73,7 +73,7 @@ export class MovementController {
 
     onCyclingPower(watts) {
         this.moveForward = watts > 5;
-        this.moveSpeed = watts / 20;
+        this.moveSpeed = watts / 50;
     }
 
     update(deltaTime, collidableMeshes) {
