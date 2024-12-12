@@ -3,6 +3,8 @@ Run this command in the project root directory, then select which page you want:
 	python -m http.server
 
 TIP: Keep each file small and modular, so that Claude/GPTo1 can keep writing all the code!
+TIP: A common guideline is to aim for modules under 300–500 lines of code
+	NOTE: - This is where Claude/GPT performance starts to falls off, so it's a great rule to stick with!!!
 NOTE: Claude was (slowly) able to start the python server and run the code, but had no idea how to test it. It's quicker to do it yourself.
 
 
