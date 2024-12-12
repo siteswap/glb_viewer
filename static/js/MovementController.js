@@ -71,6 +71,14 @@ export class MovementController {
         }
     }
 
+    onCyclingPower(watts) {
+        if (watts > 49) {
+            this.moveForward = true;
+        } else {
+            this.moveForward = false;
+        }
+    }
+
     update(deltaTime, collidableMeshes) {
         this.groundRaycaster.ray.origin.copy(this.camera.position);
         

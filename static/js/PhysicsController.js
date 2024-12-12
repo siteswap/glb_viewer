@@ -32,6 +32,10 @@ export class PhysicsController {
         this.movementController.onKeyUp(event);
     }
 
+    onCyclingPower(watts) {
+        this.movementController.onCyclingPower(watts);
+    }
+
     isMobiusRing(object) {
         const mobiusRings = this.mobiusRingController.getRings();
         return mobiusRings.find(ring => ring === object || ring.children.includes(object));

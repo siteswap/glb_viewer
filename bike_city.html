@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GLB First Person Viewer</title>
+    <link rel="stylesheet" type="text/css" href="static/css/style.css">
+</head>
+<body>
+    <div id="container">
+        <div id="progressContainer">
+            <div>Loading Model...</div>
+            <div id="progressBar">
+                <div id="progressFill"></div>
+            </div>
+        </div>
+        <div id="instructions">
+            <div id="scoreDisplay">Score: 0</div>
+            <div id="trainerStatus">Not Connected</div>
+            <div id="powerDisplay">Power: <span id="powerValue">0</span>W</div>
+            <button id="connectButton">Connect to Trainer</button>
+            <div>WASD keys to move | Mouse to look around | Left Click to shoot plasma</div>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { PhysicsController } from './static/js/PhysicsController.js';
+
+        let scene, camera, renderer, controls, currentModel;
+        let physicsController;
+        const clock = new THREE.Clock();
+
+        const CYCLING_POWER_SERVICE = 0x1818;
+        const CYCLING_POWER_MEASUREMENT = 0x2A63;
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0xf0f0f0);
+            document.getElementById('container').appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            camera.position.y = 1.8;
+            controls = new PointerLockControls(camera, document.body);
+            physicsController = new PhysicsController(camera, scene);
+
+            renderer.domElement.addEventListener('click', () => controls.lock());
+            document.addEventListener('keydown', (e) => physicsController.onKeyDown(e));
+            document.addEventListener('keyup', (e) => physicsController.onKeyUp(e));
+            document.addEventListener('mousedown', (e) => {
+                if (controls.isLocked) {
+                    physicsController.onMouseClick(e);
+                }
+            });
+            window.addEventListener('resize', onWindowResize, false);
+
+            // Set up trainer connection button
+            document.getElementById('connectButton').addEventListener('click', connectToTrainer);
+
+            loadGLB();
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const deltaTime = clock.getDelta();
+            
+            if (controls.isLocked) {
+                physicsController.update(deltaTime);
+                document.getElementById('scoreDisplay').textContent = `Score: ${physicsController.score}`;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function loadGLB() {
+            const loader = new GLTFLoader();
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            
+            progressContainer.style.display = 'block';
+
+            if (currentModel) {
+                scene.remove(currentModel);
+            }
+
+            loader.load(
+                'static/glb/town4new.glb',
+                function (gltf) {
+                    progressContainer.style.display = 'none';
+                    
+                    currentModel = gltf.scene;
+                    scene.add(currentModel);
+
+                    const box = new THREE.Box3().setFromObject(currentModel);
+                    const center = box.getCenter(new THREE.Vector3());
+                    const size = box.getSize(new THREE.Vector3());
+                    
+                    currentModel.position.x = -center.x;
+                    currentModel.position.z = -center.z;
+                    
+                    camera.position.set(size.x / 2, 1.8, size.z / 2);
+
+                    // Load mobius rings after city is loaded and positioned
+                    physicsController.loadMobiusRings(size);
+                },
+                function (xhr) {
+                    const percent = (xhr.loaded / xhr.total) * 100;
+                    progressFill.style.width = percent + '%';
+                },
+                function (error) {
+                    console.error('Error loading GLB:', error);
+                    progressContainer.style.display = 'none';
+                    alert('Error loading GLB file. Please try again.');
+                }
+            );
+        }
+
+        function parsePower(value) {
+            const data = new DataView(value.buffer);
+            // Power is typically in the first 2 bytes (little endian)
+            return data.getUint16(0, true);
+        }
+
+        async function connectToTrainer() {
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    filters: [{ services: [CYCLING_POWER_SERVICE] }]
+                });
+
+                document.getElementById('trainerStatus').textContent = 'Connecting...';
+
+                const server = await device.gatt.connect();
+                const service = await server.getPrimaryService(CYCLING_POWER_SERVICE);
+                const characteristic = await service.getCharacteristic(CYCLING_POWER_MEASUREMENT);
+
+                document.getElementById('trainerStatus').textContent = 'Connected';
+                document.getElementById('connectButton').disabled = true;
+
+                // Listen for power measurements
+                await characteristic.startNotifications();
+                characteristic.addEventListener('characteristicvaluechanged', (event) => {
+                    const power = parsePower(event.target.value);
+                    document.getElementById('powerValue').textContent = power;
+                    physicsController.onCyclingPower(power);
+                });
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('trainerStatus').textContent = `Error: ${error.message}`;
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
