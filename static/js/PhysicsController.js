@@ -10,7 +10,7 @@ export class PhysicsController {
         this.plasmaBlasts = [];
         this.score = 0;
         this.gravity = -9.8;
-        this.velocity = new THREE.Vector3();
+
         this.plasmaSpeed = 30.0;
         this.plasmaLifetime = 2.0; // seconds
         
