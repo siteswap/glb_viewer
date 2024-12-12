@@ -15,9 +15,6 @@
             cursor: pointer;
             touch-action: manipulation;
         }
-        .control-btn.active {
-            background: rgba(255, 0, 0, 0.4);
-        }
         .stats-container {
             display: flex;
             gap: 20px;
@@ -34,6 +31,9 @@
             right: 20px;
             bottom: 20px;
             z-index: 1000;
+        }
+        .shoot-btn.active {
+            background: rgba(255, 0, 0, 0.7);
         }
     </style>
 </head>
@@ -52,8 +52,8 @@
                 <div id="scoreDisplay">0</div>
                 <div id="powerDisplay"><span id="powerValue">0</span>W</div>
                 <button id="connectButton">Connect</button>
+                <button class="shoot-btn" id="shoot"><i class="fas fa-crosshairs"></i></button>
             </div>
-            <button class="control-btn" id="shoot"><i class="fas fa-crosshairs"></i></button>
         </div>
     </div>
 

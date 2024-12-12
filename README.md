@@ -8,8 +8,9 @@ TIP: A common guideline is to aim for modules under 300–500 lines of code
 
 
 TODO:
-	1) Check viewing on phone screen, landscape view! Buttons too big, take up everything!
-	2) Increase bike resistance if shoot is on? Increase shots / radius with more power?
+	1) BIG, transparent buttons on far left and far right of the screen for steering.
+	2) Wattage is not getting translated accurately - always 0, 16 or 48.
+	3) Increase bike resistance if shoot is on? Increase shots / radius with more power?
 	---- Phase II  ----
 	1) Extend power_app.html with gyroscope steering 'power_steering_app.html'
 	---- Phase III ----
