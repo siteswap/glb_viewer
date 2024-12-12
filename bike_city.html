@@ -3,16 +3,8 @@
 <head>
     <title>GLB First Person Viewer</title>
     <link rel="stylesheet" type="text/css" href="static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        #controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 1000;
-        }
         .control-btn {
             padding: 15px 30px;
             font-size: 18px;
@@ -25,6 +17,9 @@
         }
         .control-btn:active {
             background: rgba(0, 0, 0, 0.9);
+        }
+        .control-btn i {
+            font-size: 24px;
         }
     </style>
 </head>
@@ -41,9 +36,9 @@
             <div id="trainerStatus">Not Connected</div>
             <div id="powerDisplay">Power: <span id="powerValue">0</span>W</div>
             <button id="connectButton">Connect to Trainer</button>
-                <button class="control-btn" id="turnLeft">Turn Left</button>
-                <button class="control-btn" id="shoot">Shoot</button>
-                <button class="control-btn" id="turnRight">Turn Right</button>
+            <button class="control-btn" id="turnLeft"><i class="fas fa-arrow-left"></i></button>
+            <button class="control-btn" id="shoot"><i class="fas fa-crosshairs"></i></button>
+            <button class="control-btn" id="turnRight"><i class="fas fa-arrow-right"></i></button>
         </div>
     </div>
 
