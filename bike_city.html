@@ -69,7 +69,8 @@
         // Track button states
         const buttonStates = {
             turnLeft: false,
-            turnRight: false
+            turnRight: false,
+            shoot: false
         };
 
         function init() {
@@ -93,6 +94,7 @@
             // Set up control buttons with continuous rotation
             const turnLeft = document.getElementById('turnLeft');
             const turnRight = document.getElementById('turnRight');
+            const shoot = document.getElementById('shoot');
 
             // Mouse events
             turnLeft.addEventListener('mousedown', () => { buttonStates.turnLeft = true; });
@@ -102,6 +104,10 @@
             turnRight.addEventListener('mousedown', () => { buttonStates.turnRight = true; });
             turnRight.addEventListener('mouseup', () => { buttonStates.turnRight = false; });
             turnRight.addEventListener('mouseleave', () => { buttonStates.turnRight = false; });
+
+            shoot.addEventListener('mousedown', () => { buttonStates.shoot = true; });
+            shoot.addEventListener('mouseup', () => { buttonStates.shoot = false; });
+            shoot.addEventListener('mouseleave', () => { buttonStates.shoot = false; });
 
             // Touch events
             turnLeft.addEventListener('touchstart', (e) => { 
@@ -117,10 +123,13 @@
             });
             turnRight.addEventListener('touchend', () => { buttonStates.turnRight = false; });
             turnRight.addEventListener('touchcancel', () => { buttonStates.turnRight = false; });
-            
-            document.getElementById('shoot').addEventListener('click', () => {
-                physicsController.onMouseClick({ button: 0 });
+
+            shoot.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                buttonStates.shoot = true;
             });
+            shoot.addEventListener('touchend', () => { buttonStates.shoot = false; });
+            shoot.addEventListener('touchcancel', () => { buttonStates.shoot = false; });
 
             document.addEventListener('keydown', (e) => physicsController.onKeyDown(e));
             document.addEventListener('keyup', (e) => physicsController.onKeyUp(e));
@@ -143,6 +152,11 @@
             }
             if (buttonStates.turnRight) {
                 camera.rotation.y -= ROTATION_ANGLE;
+            }
+            
+            // Handle continuous shooting
+            if (buttonStates.shoot) {
+                physicsController.onShootButtonHeld();
             }
             
             physicsController.update(deltaTime);

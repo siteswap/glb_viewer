@@ -12,6 +12,10 @@ export class PhysicsController {
         this.movementController = new MovementController(camera);
         this.mobiusRingController = new MobiusRingController(scene); // scene to add/remove
         this.plasmaBlastController = new PlasmaBlastController(camera, scene); // camera to get direction, scene to add/remove
+
+        // Shooting rate limit (5 shots per second = 200ms between shots)
+        this.lastShotTime = 0;
+        this.shootingCooldown = 200; // milliseconds
     }
 
     loadMobiusRings(citySize) {
@@ -20,7 +24,19 @@ export class PhysicsController {
 
     onMouseClick(event) {
         if (event.button === 0) { // Left click
+            this.tryShoot();
+        }
+    }
+
+    onShootButtonHeld() {
+        this.tryShoot();
+    }
+
+    tryShoot() {
+        const currentTime = Date.now();
+        if (currentTime - this.lastShotTime >= this.shootingCooldown) {
             this.plasmaBlastController.createPlasmaBlast();
+            this.lastShotTime = currentTime;
         }
     }
 
