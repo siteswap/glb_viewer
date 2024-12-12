@@ -77,6 +77,9 @@
         const ROTATION_ANGLE = Math.PI / 90; // Amount to rotate per frame when held
         const CYCLING_POWER_SERVICE = 0x1818;
         const CYCLING_POWER_MEASUREMENT = 0x2A63;
+        // Same values as above but in full UUID form:
+        //const CYCLING_POWER_SERVICE = '00001818-0000-1000-8000-00805f9b34fb'; // Cycling Power Service UUID
+        //const CYCLING_POWER_MEASUREMENT = '00002A63-0000-1000-8000-00805f9b34fb'; // Cycling Power Measurement Characteristic UUID
 
         // Track button states
         const buttonStates = {
@@ -223,8 +226,9 @@
 
         function parsePower(value) {
             const data = new DataView(value.buffer);
-            // Power is typically in the first 2 bytes (little endian)
-            return data.getUint16(0, true);
+            const flags = data.getUint16(0, true); // First 2 bytes are flags
+            const instantaneousPower = data.getInt16(2, true); // Next 2 bytes are instantaneous power in watts (signed)
+            return instantaneousPower
         }
 
         async function connectToTrainer() {
