@@ -16,6 +16,9 @@ export class PhysicsController {
         // Shooting rate limit (5 shots per second = 200ms between shots)
         this.lastShotTime = 0;
         this.shootingCooldown = 200; // milliseconds
+        
+        // Continuous fire mode
+        this.continuousFireEnabled = false;
     }
 
     loadMobiusRings(citySize) {
@@ -29,7 +32,15 @@ export class PhysicsController {
     }
 
     onShootButtonHeld() {
-        this.tryShoot();
+        // Only process continuous shooting if continuous fire is disabled
+        // When continuous fire is enabled, shooting is handled in update()
+        if (!this.continuousFireEnabled) {
+            this.tryShoot();
+        }
+    }
+
+    toggleContinuousFire() {
+        this.continuousFireEnabled = !this.continuousFireEnabled;
     }
 
     tryShoot() {
@@ -66,6 +77,11 @@ export class PhysicsController {
                 collidableMeshes.push(object);
             }
         });
+
+        // Handle continuous fire mode
+        if (this.continuousFireEnabled) {
+            this.tryShoot();
+        }
 
         this.mobiusRingController.updateMobiusRings(deltaTime);
         this.movementController.update(deltaTime, collidableMeshes);
