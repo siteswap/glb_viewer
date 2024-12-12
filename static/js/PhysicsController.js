@@ -8,11 +8,11 @@ export class PhysicsController {
         this.camera = camera;
         this.scene = scene;
         this.score = 0;
-        this.gravity = -9.8;
-        
+       
+        // No direct dependencies between these modules. PhysicsController manages all interactions.
         this.movementController = new MovementController(camera);
-        this.mobiusRingController = new MobiusRingController(scene);
-        this.plasmaBlastController = new PlasmaBlastController(camera, scene);
+        this.mobiusRingController = new MobiusRingController(scene); // scene to add/remove
+        this.plasmaBlastController = new PlasmaBlastController(camera, scene); // camera to get direction, scene to add/remove
     }
 
     loadMobiusRings(citySize) {
