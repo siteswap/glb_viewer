@@ -8,12 +8,7 @@ TIP: A common guideline is to aim for modules under 300–500 lines of code
 
 
 TODO:
-	1) copy to bike_city.html
-	2) Move this logic to MovementController.js with a button 'Pair Trainer'
-		- Show wattage alongside score
-	3) Add left, right & shoot buttons
-	4) Deploy fpv_city so you can access it on smartphone
-
+	1) Deploy fpv_city so you can access it on smartphone
 	---- Phase II  ----
 	1) Extend power_app.html with gyroscope steering 'power_steering_app.html'
 	---- Phase III ----

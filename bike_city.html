@@ -3,6 +3,30 @@
 <head>
     <title>GLB First Person Viewer</title>
     <link rel="stylesheet" type="text/css" href="static/css/style.css">
+    <style>
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .control-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .control-btn:active {
+            background: rgba(0, 0, 0, 0.9);
+        }
+    </style>
 </head>
 <body>
     <div id="container">
@@ -17,7 +41,9 @@
             <div id="trainerStatus">Not Connected</div>
             <div id="powerDisplay">Power: <span id="powerValue">0</span>W</div>
             <button id="connectButton">Connect to Trainer</button>
-            <div>WASD keys to move | Mouse to look around | Left Click to shoot plasma</div>
+                <button class="control-btn" id="turnLeft">Turn Left</button>
+                <button class="control-btn" id="shoot">Shoot</button>
+                <button class="control-btn" id="turnRight">Turn Right</button>
         </div>
     </div>
 
@@ -32,14 +58,13 @@
 
     <script type="module">
         import * as THREE from 'three';
-        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { PhysicsController } from './static/js/PhysicsController.js';
 
-        let scene, camera, renderer, controls, currentModel;
+        let scene, camera, renderer, currentModel;
         let physicsController;
         const clock = new THREE.Clock();
-
+        const ROTATION_ANGLE = Math.PI / 90; // Amount to rotate per button press
         const CYCLING_POWER_SERVICE = 0x1818;
         const CYCLING_POWER_MEASUREMENT = 0x2A63;
 
@@ -59,17 +84,23 @@
             scene.add(directionalLight);
 
             camera.position.y = 1.8;
-            controls = new PointerLockControls(camera, document.body);
             physicsController = new PhysicsController(camera, scene);
 
-            renderer.domElement.addEventListener('click', () => controls.lock());
+            // Set up control buttons
+            document.getElementById('turnLeft').addEventListener('click', () => {
+                camera.rotation.y += ROTATION_ANGLE;
+            });
+            
+            document.getElementById('turnRight').addEventListener('click', () => {
+                camera.rotation.y -= ROTATION_ANGLE;
+            });
+            
+            document.getElementById('shoot').addEventListener('click', () => {
+                physicsController.onMouseClick({ button: 0 });
+            });
+
             document.addEventListener('keydown', (e) => physicsController.onKeyDown(e));
             document.addEventListener('keyup', (e) => physicsController.onKeyUp(e));
-            document.addEventListener('mousedown', (e) => {
-                if (controls.isLocked) {
-                    physicsController.onMouseClick(e);
-                }
-            });
             window.addEventListener('resize', onWindowResize, false);
 
             // Set up trainer connection button
@@ -83,10 +114,8 @@
             requestAnimationFrame(animate);
             const deltaTime = clock.getDelta();
             
-            if (controls.isLocked) {
-                physicsController.update(deltaTime);
-                document.getElementById('scoreDisplay').textContent = `Score: ${physicsController.score}`;
-            }
+            physicsController.update(deltaTime);
+            document.getElementById('scoreDisplay').textContent = `Score: ${physicsController.score}`;
 
             renderer.render(scene, camera);
         }
