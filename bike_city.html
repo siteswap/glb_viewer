@@ -64,9 +64,15 @@
         let scene, camera, renderer, currentModel;
         let physicsController;
         const clock = new THREE.Clock();
-        const ROTATION_ANGLE = Math.PI / 90; // Amount to rotate per button press
+        const ROTATION_ANGLE = Math.PI / 90; // Amount to rotate per frame when held
         const CYCLING_POWER_SERVICE = 0x1818;
         const CYCLING_POWER_MEASUREMENT = 0x2A63;
+
+        // Track button states
+        const buttonStates = {
+            turnLeft: false,
+            turnRight: false
+        };
 
         function init() {
             scene = new THREE.Scene();
@@ -86,14 +92,33 @@
             camera.position.y = 1.8;
             physicsController = new PhysicsController(camera, scene);
 
-            // Set up control buttons
-            document.getElementById('turnLeft').addEventListener('click', () => {
-                camera.rotation.y += ROTATION_ANGLE;
+            // Set up control buttons with continuous rotation
+            const turnLeft = document.getElementById('turnLeft');
+            const turnRight = document.getElementById('turnRight');
+
+            // Mouse events
+            turnLeft.addEventListener('mousedown', () => { buttonStates.turnLeft = true; });
+            turnLeft.addEventListener('mouseup', () => { buttonStates.turnLeft = false; });
+            turnLeft.addEventListener('mouseleave', () => { buttonStates.turnLeft = false; });
+
+            turnRight.addEventListener('mousedown', () => { buttonStates.turnRight = true; });
+            turnRight.addEventListener('mouseup', () => { buttonStates.turnRight = false; });
+            turnRight.addEventListener('mouseleave', () => { buttonStates.turnRight = false; });
+
+            // Touch events
+            turnLeft.addEventListener('touchstart', (e) => { 
+                e.preventDefault();
+                buttonStates.turnLeft = true; 
             });
-            
-            document.getElementById('turnRight').addEventListener('click', () => {
-                camera.rotation.y -= ROTATION_ANGLE;
+            turnLeft.addEventListener('touchend', () => { buttonStates.turnLeft = false; });
+            turnLeft.addEventListener('touchcancel', () => { buttonStates.turnLeft = false; });
+
+            turnRight.addEventListener('touchstart', (e) => { 
+                e.preventDefault();
+                buttonStates.turnRight = true; 
             });
+            turnRight.addEventListener('touchend', () => { buttonStates.turnRight = false; });
+            turnRight.addEventListener('touchcancel', () => { buttonStates.turnRight = false; });
             
             document.getElementById('shoot').addEventListener('click', () => {
                 physicsController.onMouseClick({ button: 0 });
@@ -113,6 +138,14 @@
         function animate() {
             requestAnimationFrame(animate);
             const deltaTime = clock.getDelta();
+            
+            // Apply continuous rotation if buttons are held
+            if (buttonStates.turnLeft) {
+                camera.rotation.y += ROTATION_ANGLE;
+            }
+            if (buttonStates.turnRight) {
+                camera.rotation.y -= ROTATION_ANGLE;
+            }
             
             physicsController.update(deltaTime);
             document.getElementById('scoreDisplay').textContent = `Score: ${physicsController.score}`;

@@ -8,7 +8,7 @@ TIP: A common guideline is to aim for modules under 300–500 lines of code
 
 
 TODO:
-	1) Deploy fpv_city so you can access it on smartphone
+	1) Check viewing on phone screen, landscape view! Buttons too big, take up everything!
 	---- Phase II  ----
 	1) Extend power_app.html with gyroscope steering 'power_steering_app.html'
 	---- Phase III ----
