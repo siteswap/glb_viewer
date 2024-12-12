@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MovementController } from './MovementController.js';
 import { MobiusRingController } from './MobiusRingController.js';
+import { PlasmaBlastController } from './PlasmaBlastController.js';
 
 export class PhysicsController {
     constructor(camera, scene) {
@@ -10,47 +11,20 @@ export class PhysicsController {
         this.plasmaBlasts = [];
         this.score = 0;
         this.gravity = -9.8;
-
-        this.plasmaSpeed = 30.0;
-        this.plasmaLifetime = 2.0; // seconds
         
         this.movementController = new MovementController(camera);
         this.mobiusRingController = new MobiusRingController(scene);
+        this.plasmaBlastController = new PlasmaBlastController(camera, scene);
     }
 
     loadMobiusRings(citySize) {
         this.mobiusRingController.loadMobiusRings(citySize);
     }
 
-    createPlasmaBlast() {
-        const geometry = new THREE.SphereGeometry(0.2, 16, 16);
-        const material = new THREE.MeshPhongMaterial({
-            color: 0x00ff00,
-            emissive: 0x00ff00,
-            emissiveIntensity: 2,
-            transparent: true,
-            opacity: 0.8
-        });
-        const plasma = new THREE.Mesh(geometry, material);
-        
-        // Set initial position at camera position
-        plasma.position.copy(this.camera.position);
-        
-        // Get direction camera is facing
-        const direction = new THREE.Vector3();
-        this.camera.getWorldDirection(direction);
-        
-        // Store velocity for this plasma blast
-        plasma.velocity = direction.multiplyScalar(this.plasmaSpeed);
-        plasma.timeCreated = Date.now();
-        
-        this.scene.add(plasma);
-        this.plasmaBlasts.push(plasma);
-    }
-
     onMouseClick(event) {
         if (event.button === 0) { // Left click
-            this.createPlasmaBlast();
+            const plasma = this.plasmaBlastController.createPlasmaBlast();
+            this.plasmaBlasts.push(plasma);
         }
     }
 
@@ -71,7 +45,7 @@ export class PhysicsController {
             
             // Check lifetime
             const age = (Date.now() - plasma.timeCreated) / 1000; // Convert to seconds
-            if (age > this.plasmaLifetime) {
+            if (age > this.plasmaBlastController.plasmaLifetime) {
                 this.scene.remove(plasma);
                 this.plasmaBlasts.splice(i, 1);
                 continue;
