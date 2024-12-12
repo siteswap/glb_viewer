@@ -154,24 +154,8 @@ export class PhysicsController {
         }
     }
 
-    update(deltaTime) {
-        if (!this.camera || !this.scene) return;
-
-        // Update mobius rings rotation
-        this.mobiusRings.forEach((ring) => {
-            ring.rotation.x += ring.rotationSpeed.x * deltaTime;
-            ring.rotation.y += ring.rotationSpeed.y * deltaTime;
-            ring.rotation.z += ring.rotationSpeed.z * deltaTime;
-        });
-
+    updateMovement(deltaTime, collidableMeshes) {
         this.groundRaycaster.ray.origin.copy(this.camera.position);
-        
-        const collidableMeshes = [];
-        this.scene.traverse(object => {
-            if (object.isMesh && object !== this.camera) {
-                collidableMeshes.push(object);
-            }
-        });
         
         const groundIntersects = this.groundRaycaster.intersectObjects(collidableMeshes);
         if (groundIntersects.length > 0) {
@@ -208,8 +192,9 @@ export class PhysicsController {
             moveDirection.multiplyScalar(this.moveSpeed * deltaTime);
             this.camera.position.add(moveDirection);
         }
+    }
 
-        // Update plasma blasts
+    updatePlasmaBlasts(deltaTime, collidableMeshes) {
         for (let i = this.plasmaBlasts.length - 1; i >= 0; i--) {
             const plasma = this.plasmaBlasts[i];
             
@@ -250,5 +235,28 @@ export class PhysicsController {
                 this.plasmaBlasts.splice(i, 1);
             }
         }
+    }
+
+    updateMobiusRings(deltaTime) {
+        this.mobiusRings.forEach((ring) => {
+            ring.rotation.x += ring.rotationSpeed.x * deltaTime;
+            ring.rotation.y += ring.rotationSpeed.y * deltaTime;
+            ring.rotation.z += ring.rotationSpeed.z * deltaTime;
+        });
+    }
+
+    update(deltaTime) {
+        if (!this.camera || !this.scene) return;
+
+        const collidableMeshes = [];
+        this.scene.traverse(object => {
+            if (object.isMesh && object !== this.camera) {
+                collidableMeshes.push(object);
+            }
+        });
+
+        this.updateMobiusRings(deltaTime);
+        this.updateMovement(deltaTime, collidableMeshes);
+        this.updatePlasmaBlasts(deltaTime, collidableMeshes);
     }
 }
