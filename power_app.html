@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Trainer Power Monitor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .power-display {
+            font-size: 72px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .unit {
+            font-size: 24px;
+            color: #666;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
+        .status {
+            margin: 20px 0;
+            color: #666;
+        }
+        #powerChart {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Smart Trainer Power Monitor</h1>
+    <button id="connectBtn">Connect to Trainer</button>
+    <div class="status" id="statusText">Not connected</div>
+    <div class="power-display">
+        <span id="powerValue">0</span>
+        <span class="unit">watts</span>
+    </div>
+    <canvas id="powerChart"></canvas>
+
+    <script>
+        const CYCLING_POWER_SERVICE = 0x1818;
+        const CYCLING_POWER_MEASUREMENT = 0x2A63;
+        
+        let powerData = [];
+        let powerChart;
+        
+        // Initialize the power chart
+        function initChart() {
+            const ctx = document.getElementById('powerChart').getContext('2d');
+            powerChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Power (watts)',
+                        data: [],
+                        borderColor: '#007bff',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update the chart with new power data
+        function updateChart(power) {
+            const timestamp = new Date().toLocaleTimeString();
+            powerChart.data.labels.push(timestamp);
+            powerChart.data.datasets[0].data.push(power);
+            
+            // Keep only last 30 seconds of data
+            if (powerChart.data.labels.length > 30) {
+                powerChart.data.labels.shift();
+                powerChart.data.datasets[0].data.shift();
+            }
+            
+            powerChart.update();
+        }
+
+        // Parse power data from the characteristic value
+        function parsePower(value) {
+            const data = new DataView(value.buffer);
+            // Power is typically in the first 2 bytes (little endian)
+            return data.getUint16(0, true);
+        }
+
+        async function connectToTrainer() {
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    filters: [{ services: [CYCLING_POWER_SERVICE] }]
+                });
+
+                document.getElementById('statusText').textContent = 'Connecting...';
+                const server = await device.gatt.connect();
+                
+                const service = await server.getPrimaryService(CYCLING_POWER_SERVICE);
+                const characteristic = await service.getCharacteristic(CYCLING_POWER_MEASUREMENT);
+                
+                document.getElementById('statusText').textContent = 'Connected';
+                document.getElementById('connectBtn').disabled = true;
+
+                // Listen for power measurements
+                await characteristic.startNotifications();
+                characteristic.addEventListener('characteristicvaluechanged', (event) => {
+                    const power = parsePower(event.target.value);
+                    document.getElementById('powerValue').textContent = power;
+                    updateChart(power);
+                });
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('statusText').textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // Initialize
+        document.getElementById('connectBtn').addEventListener('click', connectToTrainer);
+        initChart();
+    </script>
+</body>
+</html>
