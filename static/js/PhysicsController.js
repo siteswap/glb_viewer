@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { MovementController } from './MovementController.js';
 import { MobiusRingController } from './MobiusRingController.js';
 import { PlasmaBlastController } from './PlasmaBlastController.js';
