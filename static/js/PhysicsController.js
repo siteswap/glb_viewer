@@ -13,9 +13,9 @@ export class PhysicsController {
         this.mobiusRingController = new MobiusRingController(scene); // scene to add/remove
         this.plasmaBlastController = new PlasmaBlastController(camera, scene); // camera to get direction, scene to add/remove
 
-        // Shooting rate limit (5 shots per second = 200ms between shots)
+        // Shooting rate limit (2 shots per second = 200ms between shots)
         this.lastShotTime = 0;
-        this.shootingCooldown = 200; // milliseconds
+        this.shootingCooldown = 500; // milliseconds
         
         // Continuous fire mode
         this.continuousFireEnabled = false;
