@@ -5,10 +5,15 @@ export class MobiusRingController {
     constructor(scene) {
         this.scene = scene;
         this.mobiusRings = [];
+        this.raycaster = new THREE.Raycaster();
+        this.downVector = new THREE.Vector3(0, -1, 0);
     }
 
     loadMobiusRings(citySize) {
         const loader = new GLTFLoader();
+        const maxRingHeight = 10; // Maximum allowed height for ring placement
+        const verticalOffset = 1.0; // How high above ground to place rings
+
         loader.load(
             'static/glb/mobius.glb',
             (gltf) => {
@@ -26,11 +31,42 @@ export class MobiusRingController {
                     // Scale uniformly to maintain proportions
                     instance.scale.set(scale, scale, scale);
                     
-                    // Random position within city bounds
-                    const x = (Math.random() - 0.5) * citySize.x;
-                    const z = (Math.random() - 0.5) * citySize.z;
-                    const verticalOffset = 1.0
-                    instance.position.set(x, verticalOffset, z);
+                    // Find valid position for ring
+                    let validPosition = false;
+                    let attempts = 0;
+                    const maxAttempts = 10;
+                    
+                    while (!validPosition && attempts < maxAttempts) {
+                        // Random position within city bounds
+                        const x = (Math.random() - 0.5) * citySize.x;
+                        const z = (Math.random() - 0.5) * citySize.z;
+                        
+                        // Start raycasting from high up
+                        const rayStart = new THREE.Vector3(x, 100, z);
+                        this.raycaster.set(rayStart, this.downVector);
+                        
+                        // Get all intersections with the scene
+                        const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+                        
+                        if (intersects.length > 0) {
+                            const groundHeight = intersects[0].point.y;
+                            
+                            // Check if ground height is acceptable
+                            if (groundHeight <= maxRingHeight) {
+                                instance.position.set(x, groundHeight + verticalOffset, z);
+                                validPosition = true;
+                            }
+                        }
+                        
+                        attempts++;
+                    }
+                    
+                    // If no valid position found after max attempts, place at default height
+                    if (!validPosition) {
+                        const x = (Math.random() - 0.5) * citySize.x;
+                        const z = (Math.random() - 0.5) * citySize.z;
+                        instance.position.set(x, verticalOffset, z);
+                    }
                     
                     // Add random rotation speeds
                     instance.rotationSpeed = {
