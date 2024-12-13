@@ -102,7 +102,6 @@
             directionalLight.position.set(5, 5, 5);
             scene.add(directionalLight);
 
-            camera.position.y = 1.8;
             physicsController = new PhysicsController(camera, scene);
 
             // Set up control buttons with continuous rotation
@@ -207,7 +206,8 @@
                     currentModel.position.x = -center.x;
                     currentModel.position.z = -center.z;
                     
-                    camera.position.set(size.x / 2, 1.8, size.z / 2);
+                    // Set camera position to the middle of the scene at height 100
+                    camera.position.set(center.x, 100, center.z);
 
                     // Load mobius rings after city is loaded and positioned
                     physicsController.loadMobiusRings(size);

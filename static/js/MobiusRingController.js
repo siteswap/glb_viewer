@@ -29,7 +29,8 @@ export class MobiusRingController {
                     // Random position within city bounds
                     const x = (Math.random() - 0.5) * citySize.x;
                     const z = (Math.random() - 0.5) * citySize.z;
-                    instance.position.set(x, 2.3, z);
+                    const verticalOffset = 0.0
+                    instance.position.set(x, verticalOffset, z);
                     
                     // Add random rotation speeds
                     instance.rotationSpeed = {

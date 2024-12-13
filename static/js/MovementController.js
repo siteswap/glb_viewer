@@ -3,8 +3,8 @@ import * as THREE from 'three';
 export class MovementController {
     constructor(camera) {
         this.camera = camera;
-        this.moveSpeed = 5.0;
-        this.verticalOffset = 1.8;
+        this.moveSpeed = 1.0;
+        this.verticalOffset = 0.0;
         
         this.groundRaycaster = new THREE.Raycaster();
         this.groundRaycaster.ray.direction.set(0, -1, 0);
@@ -73,7 +73,7 @@ export class MovementController {
 
     onCyclingPower(watts) {
         this.moveForward = watts > 5;
-        this.moveSpeed = watts / 50;
+        this.moveSpeed = watts / 150;
     }
 
     update(deltaTime, collidableMeshes) {
