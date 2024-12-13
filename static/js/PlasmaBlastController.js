@@ -38,6 +38,7 @@ export class PlasmaBlastController {
 
     updatePlasmaBlasts(deltaTime, collidableMeshes) {
         const collisions = [];
+        const mobiusRings = collidableMeshes.filter(mesh => mesh.parent && mesh.parent.rotationSpeed); // Filter for Mobius rings
 
         for (let i = this.plasmaBlasts.length - 1; i >= 0; i--) {
             const plasma = this.plasmaBlasts[i];
@@ -72,6 +73,21 @@ export class PlasmaBlastController {
                 // Remove the plasma blast
                 this.scene.remove(plasma);
                 this.plasmaBlasts.splice(i, 1);
+            }
+
+            // Check for collisions with Mobius rings based on distance to center
+            for (const ring of mobiusRings) {  // TODO - is this expensive?
+                const ringCenter = ring.parent.position;
+                const distance = plasma.position.distanceTo(ringCenter);
+                
+                if (distance <= 1.0) {
+                    // Add collision information
+                    collisions.push(ring.parent);
+
+                    // Remove the plasma blast
+                    this.scene.remove(plasma);
+                    this.plasmaBlasts.splice(i, 1);
+                }
             }
         }
 
