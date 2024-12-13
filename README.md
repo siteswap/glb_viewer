@@ -8,15 +8,19 @@ TIP: A common guideline is to aim for modules under 300–500 lines of code
 
 
 TODO:
-	1) Add 'fullscreen mode' to help 
-	--- Cycle 10 mins ---
 	1) Tidy the code
-	1) Question - distance check efficiency?
-	1) Add Timer
-	---- Phase II  ----
-	1) Extend power_app.html with gyroscope steering 'power_steering_app.html'
-	---- Phase - monsters ----
-	1) MONSTERS that attack - for Fraser
+	1) Move the white console out of the way (top left for score & power)
+	1) Question - distance check efficiency? Ask GPT.
+	Productionize & monetize asap
+		- Stripe (ad-free, $1 / month)
+		- Ad-sense 
+	---- Phase - progression ----
+	1) MONSTERS that follow you - for Fraser
+	1) Re-spawn rings if all found
+	1) Different weapon modules (that get dropped after X many rings found):
+		Longer range
+		Double blaster
+		Huge radius blaster
 	---- Phase IV  ----
 	1) Host a central server with websocket/json updates 
 	2) Multi-player: access from desktop & ipad at same time.
@@ -24,3 +28,12 @@ TODO:
 		- Be the 'gunner' for the first rider
 	3) LAN host option for performance 
 
+
+All the common FPV features:
+	Monsters chase / shoot
+	Weapons pick ups
+	Buy improvements / customisations
+	Level progression (Procedural Building Generator 2)
+	Big boss
+	Online multiplayer arena
+		
