@@ -33,6 +33,11 @@ export class MovementController {
         // Touchscreen buttons
         this.turnLeft = false;
         this.turnRight = false;
+
+        // Flying mode
+        this.flyingMode = false;
+        this.verticalSpeed = 0;
+        this.watts = 0;
     }
 
     setTurnLeft(bool) {
@@ -61,6 +66,14 @@ export class MovementController {
             case 'ArrowRight':
                 this.moveRight = true;
                 break;
+            case 'KeyJ':
+                this.watts += 10;
+                this.onCyclingPower(this.watts);
+                break;
+            case 'KeyK':
+                this.watts -= 10;
+                this.onCyclingPower(this.watts);
+                break;
         }
     }
 
@@ -88,6 +101,7 @@ export class MovementController {
     onCyclingPower(watts) {
         this.moveForward = watts > 5;
         this.moveSpeed = watts / 100;
+        this.verticalSpeed = (watts - 200) / 100;
     }
 
     updateRotation() {
@@ -106,7 +120,11 @@ export class MovementController {
         if (groundIntersects.length > 0) {
             const groundPoint = groundIntersects[0].point;
             const targetY = groundPoint.y + this.verticalOffset;
-            this.camera.position.y += (targetY - this.camera.position.y) * 0.1;
+            let defaultVerticalSpeed = targetY - this.camera.position.y;
+            if (this.flyingMode) {
+                defaultVerticalSpeed = Math.max(this.verticalSpeed, defaultVerticalSpeed);
+            }
+            this.camera.position.y += defaultVerticalSpeed * deltaTime;
         }
         
         const moveDirection = new THREE.Vector3();

@@ -209,6 +209,7 @@
                     if (mobiusRingController.removeRing(mobiusRing)) {
                         score += 1;
                         if (score == 10) { // Fast firing
+                            movementController.flyingMode = false;
                             plasmaBlastController.blastColor = 0x0000ff;
                             plasmaBlastController.shootingCooldown = 500;
                             plasmaBlastController.plasmaLifetime = 2.0;
@@ -223,6 +224,9 @@
                         if (score == 40) {
                             movementController.speedMultiplier = 2.0; // Double speed
                         }
+                        if (score == 45) {
+                            movementController.flyingMode = true;
+                        }
                     }
                 }
             }
@@ -234,6 +238,7 @@
             
             detectCollisions(deltaTime);
             document.getElementById('scoreDisplay').textContent = `S: ${score}`;
+            document.getElementById('powerValue').textContent = movementController.watts;
 
             renderer.render(scene, camera);
         }
@@ -314,7 +319,6 @@
                 await characteristic.startNotifications();
                 characteristic.addEventListener('characteristicvaluechanged', (event) => {
                     const power = parsePower(event.target.value);
-                    document.getElementById('powerValue').textContent = power;
                     movementController.onCyclingPower(power);
                 });
 

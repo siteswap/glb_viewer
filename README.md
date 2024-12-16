@@ -8,13 +8,7 @@ TIP: A common guideline is to aim for modules under 300–500 lines of code
 
 
 TODO:
-	1) Tidy the code
-	2) Powerups & monsters (standard FPV shooter stuff)
-		- Start with no gun, have to find it
-
-
-
-
+	1) Add a wandering dinosaur (later can shoot it)
 
 
 	---------------------------
