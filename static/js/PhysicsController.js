@@ -3,24 +3,14 @@ import { MobiusRingController } from './MobiusRingController.js';
 import { PlasmaBlastController } from './PlasmaBlastController.js';
 
 export class PhysicsController {
-    constructor(camera, scene, movementController) {
+    constructor(camera, scene, movementController, mobiusRingController) {
         this.camera = camera;
         this.scene = scene;
         this.score = 0;
       
         this.movementController = movementController;
-        this.mobiusRingController = new MobiusRingController(scene); // scene to add/remove
+        this.mobiusRingController = mobiusRingController;
         this.plasmaBlastController = new PlasmaBlastController(camera, scene); // camera to get direction, scene to add/remove
-    }
-
-    loadMobiusRings(citySize) {
-        this.mobiusRingController.loadMobiusRings(citySize);
-    }
-
-    onMouseClick(event) {
-        if (event.button === 0) { // Left click
-            this.plasmaBlastController.tryShoot();
-        }
     }
 
     toggleContinuousFire() {

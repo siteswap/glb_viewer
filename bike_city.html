@@ -80,9 +80,10 @@
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { PhysicsController } from './static/js/PhysicsController.js';
         import { MovementController } from './static/js/MovementController.js';
+        import { MobiusRingController } from './static/js/MobiusRingController.js';
 
         let scene, camera, renderer, currentModel;
-        let physicsController, movementController;
+        let physicsController, movementController, mobiusRingController;
         const clock = new THREE.Clock();
         const ROTATION_ANGLE = Math.PI / 90; // Amount to rotate per frame when held
         const CYCLING_POWER_SERVICE = 0x1818;
@@ -103,8 +104,9 @@
             directionalLight.position.set(5, 5, 5);
             scene.add(directionalLight);
 
+            mobiusRingController = new MobiusRingController(scene); // scene to add/remove
             movementController = new MovementController(camera);
-            physicsController = new PhysicsController(camera, scene, movementController);  // TODO - awkward
+            physicsController = new PhysicsController(camera, scene, movementController, mobiusRingController);
 
             // Set up control buttons with continuous rotation
             const turnLeft = document.getElementById('turnLeft');
@@ -239,7 +241,7 @@
                     camera.position.set(center.x, 100, center.z);
 
                     // Load mobius rings after city is loaded and positioned
-                    physicsController.loadMobiusRings(size);
+                    mobiusRingController.loadMobiusRings(size);
                 },
                 function (xhr) {
                     const percent = (xhr.loaded / xhr.total) * 100;
