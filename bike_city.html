@@ -78,12 +78,13 @@
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-        import { PhysicsController } from './static/js/PhysicsController.js';
         import { MovementController } from './static/js/MovementController.js';
         import { MobiusRingController } from './static/js/MobiusRingController.js';
+        import { PlasmaBlastController } from './static/js/PlasmaBlastController.js';
 
         let scene, camera, renderer, currentModel;
-        let physicsController, movementController, mobiusRingController;
+        let movementController, mobiusRingController, plasmaBlastController;
+        let score = 0;
         const clock = new THREE.Clock();
         const ROTATION_ANGLE = Math.PI / 90; // Amount to rotate per frame when held
         const CYCLING_POWER_SERVICE = 0x1818;
@@ -106,7 +107,7 @@
 
             mobiusRingController = new MobiusRingController(scene); // scene to add/remove
             movementController = new MovementController(camera);
-            physicsController = new PhysicsController(camera, scene, movementController, mobiusRingController);
+            plasmaBlastController = new PlasmaBlastController(camera, scene);
 
             // Set up control buttons with continuous rotation
             const turnLeft = document.getElementById('turnLeft');
@@ -129,7 +130,7 @@
 
             // Shoot button now toggles continuous fire
             shoot.addEventListener('click', () => {
-                physicsController.toggleContinuousFire();
+                plasmaBlastController.toggleContinuousFire();
                 shoot.classList.toggle('active');
             });
 
@@ -150,7 +151,7 @@
 
             shoot.addEventListener('touchstart', (e) => {
                 e.preventDefault(); // prevent scrolling / text selection
-                physicsController.toggleContinuousFire();
+                plasmaBlastController.toggleContinuousFire();
                 shoot.classList.toggle('active');
             });
 
@@ -187,6 +188,32 @@
             }
         }
 
+        function detectCollisions(deltaTime) {
+            if (!camera || !scene) return;
+
+            const collidableMeshes = [];
+            scene.traverse(object => {
+                if (object.isMesh && object !== camera) {
+                    collidableMeshes.push(object);
+                }
+            });
+
+            mobiusRingController.updateMobiusRings(deltaTime);
+            movementController.update(deltaTime, collidableMeshes);
+            
+            const collisions = plasmaBlastController.updatePlasmaBlasts(deltaTime, collidableMeshes);
+            
+            // Handle collisions
+            for (const collision of collisions) {
+                const mobiusRing = mobiusRingController.isMobiusRing(collision)
+                if (mobiusRing) {
+                    if (mobiusRingController.removeRing(mobiusRing)) {
+                        score += 1;
+                    }
+                }
+            }
+        }
+
         function animate() {
             requestAnimationFrame(animate);
             const deltaTime = clock.getDelta();
@@ -199,8 +226,8 @@
                 camera.rotation.y -= ROTATION_ANGLE;
             }
             
-            physicsController.update(deltaTime);
-            document.getElementById('scoreDisplay').textContent = `S: ${physicsController.score}`;
+            detectCollisions(deltaTime);
+            document.getElementById('scoreDisplay').textContent = `S: ${score}`;
 
             renderer.render(scene, camera);
         }
