@@ -9,13 +9,22 @@ TIP: A common guideline is to aim for modules under 300–500 lines of code
 
 TODO:
 	1) Tidy the code
+	2) Powerups & monsters (standard FPV shooter stuff)
+		- Start with no gun, have to find it
+
+
+
+
+
+
+	---------------------------
 	1) Move the white console out of the way (top left for score & power)
-	1) Question - distance check efficiency? Ask GPT.
 	Productionize & monetize asap
 		- Stripe (ad-free, $1 / month)
 		- Ad-sense 
+	1) Question - distance check efficiency? Ask GPT.
 	---- Phase - progression ----
-	1) MONSTERS that follow you - for Fraser
+	1) MONSTERS that follow you
 	1) Re-spawn rings if all found
 	1) Different weapon modules (that get dropped after X many rings found):
 		Longer range
@@ -30,10 +39,11 @@ TODO:
 
 
 All the common FPV features:
-	Monsters chase / shoot
 	Weapons pick ups
+	Monsters chase / shoot
+
 	Buy improvements / customisations
-	Level progression (Procedural Building Generator 2)
+	Level progression - need blender progress 
 	Big boss
 	Online multiplayer arena
 		
