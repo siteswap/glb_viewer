@@ -208,6 +208,17 @@
                 if (mobiusRing) {
                     if (mobiusRingController.removeRing(mobiusRing)) {
                         score += 1;
+                        if (score == 5) { // Fast firing
+                            plasmaBlastController.blastColor = 0x0000ff;
+                            plasmaBlastController.shootingCooldown = 500;
+                        } 
+                        if (score == 15) { // The BFG - huge blast radius
+                            plasmaBlastController.blastColor = 0xff0000;
+                            plasmaBlastController.shootingCooldown = 1000;
+                            plasmaBlastController.plasmaLifetime = 3.0;
+                            plasmaBlastController.collisionDistance = 5;
+                            plasmaBlastController.blastRadius = 4.0;
+                        }
                     }
                 }
             }

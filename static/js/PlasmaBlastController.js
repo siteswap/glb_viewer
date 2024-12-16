@@ -7,13 +7,16 @@ export class PlasmaBlastController {
         this.plasmaSpeed = 30.0;
         this.plasmaLifetime = 2.0; // seconds
         this.plasmaBlasts = [];
+        this.blastColor = 0x00ff00;
 
         // Shooting rate limit (2 shots per second = 200ms between shots)
         this.lastShotTime = 0;
-        this.shootingCooldown = 500; // milliseconds
+        this.shootingCooldown = 2000; // milliseconds
         
         // Continuous fire mode
         this.continuousFireEnabled = false;
+        this.blastRadius = 0.2;
+        this.collisionDistance = 1.0; // Destroy anything with collisionDistance of center
     }
 
     onShootButtonHeld() {
@@ -33,10 +36,10 @@ export class PlasmaBlastController {
     }
 
     createPlasmaBlast() {
-        const geometry = new THREE.SphereGeometry(0.2, 16, 16);
+        const geometry = new THREE.SphereGeometry(this.blastRadius, 16, 16);
         const material = new THREE.MeshPhongMaterial({
-            color: 0x00ff00,
-            emissive: 0x00ff00,
+            color: this.blastColor,
+            emissive: this.blastColor,
             emissiveIntensity: 2,
             transparent: true,
             opacity: 0.8
@@ -108,7 +111,7 @@ export class PlasmaBlastController {
                 const ringCenter = ring.parent.position;
                 const distance = plasma.position.distanceTo(ringCenter);
                 
-                if (distance <= 1.0) {
+                if (distance <= this.collisionDistance) {
                     // Add collision information
                     collisions.push(ring.parent);
 
