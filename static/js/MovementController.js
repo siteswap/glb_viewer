@@ -4,6 +4,7 @@ export class MovementController {
     constructor(camera) {
         this.camera = camera;
         this.moveSpeed = 2.0;
+        this.speedMultiplier = 1.0;
         this.verticalOffset = 1.0;
         this.rotationAngle = Math.PI / 90; // Amount to rotate per frame when held
         
@@ -133,7 +134,7 @@ export class MovementController {
         });
         
         if (canMove) {
-            moveDirection.multiplyScalar(this.moveSpeed * deltaTime);
+            moveDirection.multiplyScalar(this.moveSpeed * this.speedMultiplier * deltaTime);
             this.camera.position.add(moveDirection);
         }
 
