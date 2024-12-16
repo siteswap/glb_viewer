@@ -5,6 +5,7 @@ export class MovementController {
         this.camera = camera;
         this.moveSpeed = 2.0;
         this.verticalOffset = 1.0;
+        this.rotationAngle = Math.PI / 90; // Amount to rotate per frame when held
         
         this.groundRaycaster = new THREE.Raycaster();
         this.groundRaycaster.ray.direction.set(0, -1, 0);
@@ -88,6 +89,15 @@ export class MovementController {
         this.moveSpeed = watts / 100;
     }
 
+    updateRotation() {
+        if (this.turnLeft) {
+            this.camera.rotation.y += this.rotationAngle;
+        }
+        if (this.turnRight) {
+            this.camera.rotation.y -= this.rotationAngle;
+        }
+    }
+
     update(deltaTime, collidableMeshes) {
         this.groundRaycaster.ray.origin.copy(this.camera.position);
         
@@ -126,5 +136,8 @@ export class MovementController {
             moveDirection.multiplyScalar(this.moveSpeed * deltaTime);
             this.camera.position.add(moveDirection);
         }
+
+        // Update rotation
+        this.updateRotation();
     }
 }

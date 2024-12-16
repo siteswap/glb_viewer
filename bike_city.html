@@ -86,7 +86,6 @@
         let movementController, mobiusRingController, plasmaBlastController;
         let score = 0;
         const clock = new THREE.Clock();
-        const ROTATION_ANGLE = Math.PI / 90; // Amount to rotate per frame when held
         const CYCLING_POWER_SERVICE = 0x1818;
         const CYCLING_POWER_MEASUREMENT = 0x2A63;
 
@@ -217,14 +216,6 @@
         function animate() {
             requestAnimationFrame(animate);
             const deltaTime = clock.getDelta();
-            
-            // Apply continuous rotation if buttons are held
-            if (movementController.turnLeft) {
-                camera.rotation.y += ROTATION_ANGLE;
-            }
-            if (movementController.turnRight) {
-                camera.rotation.y -= ROTATION_ANGLE;
-            }
             
             detectCollisions(deltaTime);
             document.getElementById('scoreDisplay').textContent = `S: ${score}`;
