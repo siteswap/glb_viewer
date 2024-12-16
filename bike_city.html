@@ -60,6 +60,7 @@
             <div class="stats-container">
                 <div id="scoreDisplay">0</div>
                 <div id="powerDisplay"><span id="powerValue">0</span>W</div>
+                <div id="timerDisplay">0:00</div>
                 <button id="connectButton">Connect</button>
                 <button class="shoot-btn" id="shoot"><i class="fas fa-crosshairs"></i></button>
             </div>
@@ -88,6 +89,11 @@
         const clock = new THREE.Clock();
         const CYCLING_POWER_SERVICE = 0x1818;
         const CYCLING_POWER_MEASUREMENT = 0x2A63;
+        
+        // Timer variables
+        let timerStarted = false;
+        let startTime = 0;
+        let elapsedTime = 0;
 
         function init() {
             scene = new THREE.Scene();
@@ -114,21 +120,39 @@
             const shoot = document.getElementById('shoot');
             const fullscreenBtn = document.getElementById('fullscreenBtn');
 
+            // Function to start timer on first action
+            function startTimerIfNotStarted() {
+                if (!timerStarted) {
+                    timerStarted = true;
+                    startTime = Date.now();
+                }
+            }
+
             // Fullscreen button setup
-            fullscreenBtn.addEventListener('click', toggleFullscreen);
+            fullscreenBtn.addEventListener('click', () => {
+                startTimerIfNotStarted();
+                toggleFullscreen();
+            });
             document.addEventListener('fullscreenchange', updateFullscreenButton);
 
             // Mouse events
-            turnLeft.addEventListener('mousedown', () => movementController.setTurnLeft(true));
+            turnLeft.addEventListener('mousedown', () => {
+                startTimerIfNotStarted();
+                movementController.setTurnLeft(true);
+            });
             turnLeft.addEventListener('mouseup', () => movementController.setTurnLeft(false));
             turnLeft.addEventListener('mouseleave', () => movementController.setTurnLeft(false));
 
-            turnRight.addEventListener('mousedown', () => movementController.setTurnRight(true));
+            turnRight.addEventListener('mousedown', () => {
+                startTimerIfNotStarted();
+                movementController.setTurnRight(true);
+            });
             turnRight.addEventListener('mouseup', () => movementController.setTurnRight(false));
             turnRight.addEventListener('mouseleave', () => movementController.setTurnRight(false));
 
             // Shoot button now toggles continuous fire
             shoot.addEventListener('click', () => {
+                startTimerIfNotStarted();
                 plasmaBlastController.toggleContinuousFire();
                 shoot.classList.toggle('active');
             });
@@ -136,6 +160,7 @@
             // Touch events
             turnLeft.addEventListener('touchstart', (e) => { 
                 e.preventDefault(); // prevent scrolling / text selection
+                startTimerIfNotStarted();
                 movementController.setTurnLeft(true);
             });
             turnLeft.addEventListener('touchend', () => movementController.setTurnLeft(false));
@@ -143,6 +168,7 @@
 
             turnRight.addEventListener('touchstart', (e) => { 
                 e.preventDefault();
+                startTimerIfNotStarted();
                 movementController.setTurnRight(true);
             });
             turnRight.addEventListener('touchend', () => movementController.setTurnRight(false));
@@ -150,11 +176,15 @@
 
             shoot.addEventListener('touchstart', (e) => {
                 e.preventDefault(); // prevent scrolling / text selection
+                startTimerIfNotStarted();
                 plasmaBlastController.toggleContinuousFire();
                 shoot.classList.toggle('active');
             });
 
-            document.addEventListener('keydown', (e) => movementController.onKeyDown(e));
+            document.addEventListener('keydown', (e) => {
+                startTimerIfNotStarted();
+                movementController.onKeyDown(e);
+            });
             document.addEventListener('keyup', (e) => movementController.onKeyUp(e));
             window.addEventListener('resize', onWindowResize, false);
 
@@ -232,6 +262,16 @@
             }
         }
 
+        function updateTimer() {
+            if (timerStarted) {
+                elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsedTime / 60);
+                const seconds = elapsedTime % 60;
+                document.getElementById('timerDisplay').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
         function animate() {
             requestAnimationFrame(animate);
             const deltaTime = clock.getDelta();
@@ -239,6 +279,7 @@
             detectCollisions(deltaTime);
             document.getElementById('scoreDisplay').textContent = `S: ${score}`;
             document.getElementById('powerValue').textContent = movementController.watts;
+            updateTimer();
 
             renderer.render(scene, camera);
         }
