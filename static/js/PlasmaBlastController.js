@@ -7,6 +7,29 @@ export class PlasmaBlastController {
         this.plasmaSpeed = 30.0;
         this.plasmaLifetime = 2.0; // seconds
         this.plasmaBlasts = [];
+
+        // Shooting rate limit (2 shots per second = 200ms between shots)
+        this.lastShotTime = 0;
+        this.shootingCooldown = 500; // milliseconds
+        
+        // Continuous fire mode
+        this.continuousFireEnabled = false;
+    }
+
+    onShootButtonHeld() {
+        // Only process continuous shooting if continuous fire is disabled
+        // When continuous fire is enabled, shooting is handled in update()
+        if (!this.continuousFireEnabled) {
+            this.tryShoot();
+        }
+    }
+
+    tryShoot() {
+        const currentTime = Date.now();
+        if (currentTime - this.lastShotTime >= this.shootingCooldown) {
+            this.createPlasmaBlast();
+            this.lastShotTime = currentTime;
+        }
     }
 
     createPlasmaBlast() {
@@ -39,6 +62,11 @@ export class PlasmaBlastController {
     updatePlasmaBlasts(deltaTime, collidableMeshes) {
         const collisions = [];
         const mobiusRings = collidableMeshes.filter(mesh => mesh.parent && mesh.parent.rotationSpeed); // Filter for Mobius rings
+
+        // Handle continuous fire mode
+        if (this.continuousFireEnabled) {
+            this.tryShoot();
+        }
 
         for (let i = this.plasmaBlasts.length - 1; i >= 0; i--) {
             const plasma = this.plasmaBlasts[i];
@@ -92,5 +120,9 @@ export class PlasmaBlastController {
         }
 
         return collisions;
+    }
+
+    toggleContinuousFire() {
+        this.continuousFireEnabled = !this.continuousFireEnabled;
     }
 }

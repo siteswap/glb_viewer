@@ -133,7 +133,7 @@
 
             // Touch events
             turnLeft.addEventListener('touchstart', (e) => { 
-                e.preventDefault();
+                e.preventDefault(); // prevent scrolling / text selection
                 movementController.setTurnLeft(true);
             });
             turnLeft.addEventListener('touchend', () => movementController.setTurnLeft(false));
@@ -147,7 +147,7 @@
             turnRight.addEventListener('touchcancel', () => movementController.setTurnRight(false));
 
             shoot.addEventListener('touchstart', (e) => {
-                e.preventDefault();
+                e.preventDefault(); // prevent scrolling / text selection
                 physicsController.toggleContinuousFire();
                 shoot.classList.toggle('active');
             });
