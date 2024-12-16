@@ -27,6 +27,18 @@ export class MovementController {
         this.moveBackward = false;
         this.moveLeft = false;
         this.moveRight = false;
+
+        // Touchscreen buttons
+        this.turnLeft = false;
+        this.turnRight = false;
+    }
+
+    setTurnLeft(bool) {
+        this.turnLeft = bool;
+    }
+
+    setTurnRight(bool) {
+        this.turnRight = bool;
     }
 
     onKeyDown(event) {

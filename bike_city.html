@@ -79,22 +79,14 @@
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { PhysicsController } from './static/js/PhysicsController.js';
+        import { MovementController } from './static/js/MovementController.js';
 
         let scene, camera, renderer, currentModel;
-        let physicsController;
+        let physicsController, movementController;
         const clock = new THREE.Clock();
         const ROTATION_ANGLE = Math.PI / 90; // Amount to rotate per frame when held
         const CYCLING_POWER_SERVICE = 0x1818;
         const CYCLING_POWER_MEASUREMENT = 0x2A63;
-        // Same values as above but in full UUID form:
-        //const CYCLING_POWER_SERVICE = '00001818-0000-1000-8000-00805f9b34fb'; // Cycling Power Service UUID
-        //const CYCLING_POWER_MEASUREMENT = '00002A63-0000-1000-8000-00805f9b34fb'; // Cycling Power Measurement Characteristic UUID
-
-        // Track button states
-        const buttonStates = {
-            turnLeft: false,
-            turnRight: false
-        };
 
         function init() {
             scene = new THREE.Scene();
@@ -111,7 +103,8 @@
             directionalLight.position.set(5, 5, 5);
             scene.add(directionalLight);
 
-            physicsController = new PhysicsController(camera, scene);
+            movementController = new MovementController(camera);
+            physicsController = new PhysicsController(camera, scene, movementController);  // TODO - awkward
 
             // Set up control buttons with continuous rotation
             const turnLeft = document.getElementById('turnLeft');
@@ -124,13 +117,13 @@
             document.addEventListener('fullscreenchange', updateFullscreenButton);
 
             // Mouse events
-            turnLeft.addEventListener('mousedown', () => { buttonStates.turnLeft = true; });
-            turnLeft.addEventListener('mouseup', () => { buttonStates.turnLeft = false; });
-            turnLeft.addEventListener('mouseleave', () => { buttonStates.turnLeft = false; });
+            turnLeft.addEventListener('mousedown', () => movementController.setTurnLeft(true));
+            turnLeft.addEventListener('mouseup', () => movementController.setTurnLeft(false));
+            turnLeft.addEventListener('mouseleave', () => movementController.setTurnLeft(false));
 
-            turnRight.addEventListener('mousedown', () => { buttonStates.turnRight = true; });
-            turnRight.addEventListener('mouseup', () => { buttonStates.turnRight = false; });
-            turnRight.addEventListener('mouseleave', () => { buttonStates.turnRight = false; });
+            turnRight.addEventListener('mousedown', () => movementController.setTurnRight(true));
+            turnRight.addEventListener('mouseup', () => movementController.setTurnRight(false));
+            turnRight.addEventListener('mouseleave', () => movementController.setTurnRight(false));
 
             // Shoot button now toggles continuous fire
             shoot.addEventListener('click', () => {
@@ -141,17 +134,17 @@
             // Touch events
             turnLeft.addEventListener('touchstart', (e) => { 
                 e.preventDefault();
-                buttonStates.turnLeft = true; 
+                movementController.setTurnLeft(true);
             });
-            turnLeft.addEventListener('touchend', () => { buttonStates.turnLeft = false; });
-            turnLeft.addEventListener('touchcancel', () => { buttonStates.turnLeft = false; });
+            turnLeft.addEventListener('touchend', () => movementController.setTurnLeft(false));
+            turnLeft.addEventListener('touchcancel', () => movementController.setTurnLeft(false));
 
             turnRight.addEventListener('touchstart', (e) => { 
                 e.preventDefault();
-                buttonStates.turnRight = true; 
+                movementController.setTurnRight(true);
             });
-            turnRight.addEventListener('touchend', () => { buttonStates.turnRight = false; });
-            turnRight.addEventListener('touchcancel', () => { buttonStates.turnRight = false; });
+            turnRight.addEventListener('touchend', () => movementController.setTurnRight(false));
+            turnRight.addEventListener('touchcancel', () => movementController.setTurnRight(false));
 
             shoot.addEventListener('touchstart', (e) => {
                 e.preventDefault();
@@ -197,10 +190,10 @@
             const deltaTime = clock.getDelta();
             
             // Apply continuous rotation if buttons are held
-            if (buttonStates.turnLeft) {
+            if (movementController.turnLeft) {
                 camera.rotation.y += ROTATION_ANGLE;
             }
-            if (buttonStates.turnRight) {
+            if (movementController.turnRight) {
                 camera.rotation.y -= ROTATION_ANGLE;
             }
             
