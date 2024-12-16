@@ -11,7 +11,7 @@ export class MobiusRingController {
 
     loadMobiusRings(citySize) {
         const loader = new GLTFLoader();
-        const maxRingHeight = 10; // Maximum allowed height for ring placement
+        const maxRingHeight = 5; // Maximum allowed height for ring placement
         const verticalOffset = 1.0; // How high above ground to place rings
 
         loader.load(
