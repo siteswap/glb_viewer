@@ -86,6 +86,10 @@ export class MobiusRingController {
         );
     }
 
+    isMobiusRing(object) {
+        return this.mobiusRings.find(ring => ring === object || ring.children.includes(object));
+    }
+
     updateMobiusRings(deltaTime) {
         this.mobiusRings.forEach((ring) => {
             ring.rotation.x += ring.rotationSpeed.x * deltaTime;
@@ -104,7 +108,4 @@ export class MobiusRingController {
         return false;
     }
 
-    getRings() {
-        return this.mobiusRings;
-    }
 }

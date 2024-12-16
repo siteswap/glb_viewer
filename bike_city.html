@@ -152,8 +152,8 @@
                 shoot.classList.toggle('active');
             });
 
-            document.addEventListener('keydown', (e) => physicsController.onKeyDown(e));
-            document.addEventListener('keyup', (e) => physicsController.onKeyUp(e));
+            document.addEventListener('keydown', (e) => movementController.onKeyDown(e));
+            document.addEventListener('keyup', (e) => movementController.onKeyUp(e));
             window.addEventListener('resize', onWindowResize, false);
 
             // Set up trainer connection button
@@ -280,7 +280,7 @@
                 characteristic.addEventListener('characteristicvaluechanged', (event) => {
                     const power = parsePower(event.target.value);
                     document.getElementById('powerValue').textContent = power;
-                    physicsController.onCyclingPower(power);
+                    movementController.onCyclingPower(power);
                 });
 
             } catch (error) {

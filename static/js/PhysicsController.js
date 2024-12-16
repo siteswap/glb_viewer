@@ -27,23 +27,6 @@ export class PhysicsController {
         this.plasmaBlastController.toggleContinuousFire();
     }
 
-    onKeyDown(event) {
-        this.movementController.onKeyDown(event);
-    }
-
-    onKeyUp(event) {
-        this.movementController.onKeyUp(event);
-    }
-
-    onCyclingPower(watts) {
-        this.movementController.onCyclingPower(watts);
-    }
-
-    isMobiusRing(object) {
-        const mobiusRings = this.mobiusRingController.getRings();
-        return mobiusRings.find(ring => ring === object || ring.children.includes(object));
-    }
-
     update(deltaTime) {
         if (!this.camera || !this.scene) return;
 
@@ -61,7 +44,7 @@ export class PhysicsController {
         
         // Handle collisions
         for (const collision of collisions) {
-            const mobiusRing = this.isMobiusRing(collision)
+            const mobiusRing = this.mobiusRingController.isMobiusRing(collision)
             if (mobiusRing) {
                 if (this.mobiusRingController.removeRing(mobiusRing)) {
                     this.score += 1;
