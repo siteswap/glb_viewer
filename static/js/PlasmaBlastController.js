@@ -5,7 +5,7 @@ export class PlasmaBlastController {
         this.camera = camera;
         this.scene = scene;
         this.plasmaSpeed = 30.0;
-        this.plasmaLifetime = 2.0; // seconds
+        this.plasmaLifetime = 1.0; // seconds
         this.plasmaBlasts = [];
         this.blastColor = 0x00ff00;
 
