@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Walking T-Rex</title>
+    <title>T-Rex Animation Controller</title>
     <style>
         body { margin: 0; }
         canvas { display: block; }
@@ -14,14 +14,38 @@
             font-size: 20px;
             color: white;
         }
+        #controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #666;
+        }
+        button.active {
+            background: #008080;
+        }
     </style>
 </head>
 <body>
     <div id="loading">Loading T-Rex...</div>
+    <div id="controls"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
     <script>
-        // First, dynamically load the required scripts
+        // Load required scripts
         Promise.all([
             loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js'),
             loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js')
@@ -48,8 +72,9 @@
             camera.lookAt(0, 0, 0);
 
             // Renderer setup
-            const renderer = new THREE.WebGLRenderer();
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
             document.body.appendChild(renderer.domElement);
 
             // Add OrbitControls
@@ -63,23 +88,57 @@
 
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
             directionalLight.position.set(0, 10, 5);
+            directionalLight.castShadow = true;
             scene.add(directionalLight);
 
-            // Ground plane
-            const planeGeometry = new THREE.PlaneGeometry(15, 15);
+            // Ground plane with texture
+            const textureLoader = new THREE.TextureLoader();
+            const sandTexture = textureLoader.load('https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/terrain/grasslight-big.jpg');
+            sandTexture.wrapS = THREE.RepeatWrapping;
+            sandTexture.wrapT = THREE.RepeatWrapping;
+            sandTexture.repeat.set(4, 4);
+
+            const planeGeometry = new THREE.PlaneGeometry(7.5, 7.5);
             const planeMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x808080,
+                map: sandTexture,
                 side: THREE.DoubleSide
             });
             const plane = new THREE.Mesh(planeGeometry, planeMaterial);
             plane.rotation.x = -Math.PI / 2;
+            plane.receiveShadow = true;
             scene.add(plane);
 
-            // Model and animation variables
+            // Animation variables
             let mixer;
             let model;
+            let currentAction;
+            let animations = {};
             let angle = 0;
-            const pathScale = 4; // Scale of the figure eight
+            const pathScale = 2;
+            let isMoving = false;
+            let currentAnimName = '';
+            let movementSpeed = 0.01;
+
+            // Function to play animation
+            function playAnimation(name) {
+                const newAction = animations[name];
+                if (currentAction) {
+                    currentAction.fadeOut(0.5);
+                }
+                newAction.reset().fadeIn(0.5).play();
+                currentAction = newAction;
+                currentAnimName = name;
+
+                // Update movement state and speed
+                isMoving = (name === 'walk' || name === 'run');
+                movementSpeed = (name === 'run') ? 0.02 : 0.01;
+
+                // Update button states
+                document.querySelectorAll('button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`button[data-anim="${name}"]`).classList.add('active');
+            }
 
             // Load model
             const loader = new THREE.GLTFLoader();
@@ -89,6 +148,11 @@
                     document.getElementById('loading').style.display = 'none';
                     
                     model = gltf.scene;
+                    model.traverse(function(object) {
+                        if (object.isMesh) {
+                            object.castShadow = true;
+                        }
+                    });
                     scene.add(model);
 
                     // Scale and position the model
@@ -96,10 +160,25 @@
                     
                     // Setup animation
                     mixer = new THREE.AnimationMixer(model);
-                    const clips = gltf.animations;
-                    if (clips && clips.length > 0) {
-                        const walk = mixer.clipAction(clips[0]);
-                        walk.play();
+                    
+                    // Store all animations
+                    gltf.animations.forEach((clip) => {
+                        animations[clip.name] = mixer.clipAction(clip);
+                    });
+
+                    // Create buttons for each animation
+                    const controlsDiv = document.getElementById('controls');
+                    Object.keys(animations).forEach((animName) => {
+                        const button = document.createElement('button');
+                        button.textContent = animName.charAt(0).toUpperCase() + animName.slice(1);
+                        button.dataset.anim = animName;
+                        button.onclick = () => playAnimation(animName);
+                        controlsDiv.appendChild(button);
+                    });
+
+                    // Start with walk animation
+                    if (animations['walk']) {
+                        playAnimation('walk');
                     }
                 },
                 function (xhr) {
@@ -123,16 +202,16 @@
                     mixer.update(clock.getDelta());
                 }
 
-                if (model) {
+                if (model && isMoving) {
                     // Move in a figure eight pattern
-                    angle += 0.01;
+                    angle += movementSpeed;
 
                     // Calculate position using parametric equations for a figure eight
                     const x = pathScale * Math.sin(angle);
                     const z = pathScale * Math.sin(angle) * Math.cos(angle);
 
                     // Calculate the next position to determine rotation
-                    const nextAngle = angle + 0.01;
+                    const nextAngle = angle + movementSpeed;
                     const nextX = pathScale * Math.sin(nextAngle);
                     const nextZ = pathScale * Math.sin(nextAngle) * Math.cos(nextAngle);
 
