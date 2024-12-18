@@ -67,12 +67,10 @@ export class MovementController {
                 this.moveRight = true;
                 break;
             case 'KeyJ':
-                this.watts += 10;
-                this.onCyclingPower(this.watts);
+                this.onCyclingPower(this.watts + 10);
                 break;
             case 'KeyK':
-                this.watts -= 10;
-                this.onCyclingPower(this.watts);
+                this.onCyclingPower(this.watts - 10);
                 break;
         }
     }
@@ -99,6 +97,7 @@ export class MovementController {
     }
 
     onCyclingPower(watts) {
+        this.watts = watts;
         this.moveForward = watts > 5;
         this.moveSpeed = watts / 80;  // For realistic bike speeds, the divisor would be more like 20.
         this.verticalSpeed = (watts - 200) / 80;
