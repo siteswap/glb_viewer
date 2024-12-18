@@ -40,13 +40,12 @@
         import { MovementController } from './static/js/MovementController.js';
         import { MobiusRingController } from './static/js/MobiusRingController.js';
         import { PlasmaBlastController } from './static/js/PlasmaBlastController.js';
+        import { SmartTrainer } from './static/js/SmartTrainer.js';
 
         let scene, camera, renderer, currentModel;
         let movementController, mobiusRingController, plasmaBlastController;
         let score = 0;
         const clock = new THREE.Clock();
-        const CYCLING_POWER_SERVICE = 0x1818;
-        const CYCLING_POWER_MEASUREMENT = 0x2A63;
         
         // Timer variables
         let timerStarted = false;
@@ -146,8 +145,9 @@
             document.addEventListener('keyup', (e) => movementController.onKeyUp(e));
             window.addEventListener('resize', onWindowResize, false);
 
-            // Set up trainer connection button
-            document.getElementById('connectButton').addEventListener('click', connectToTrainer);
+            // Initialize SmartTrainer
+            const smartTrainer = new SmartTrainer(power => movementController.onCyclingPower(power));
+            document.getElementById('connectButton').addEventListener('click', () => smartTrainer.connect());
 
             loadGLB();
             animate();
@@ -291,41 +291,6 @@
                     alert('Error loading GLB file. Please try again.');
                 }
             );
-        }
-
-        function parsePower(value) {
-            const data = new DataView(value.buffer);
-            const flags = data.getUint16(0, true); // First 2 bytes are flags
-            const instantaneousPower = data.getInt16(2, true); // Next 2 bytes are instantaneous power in watts (signed)
-            return instantaneousPower
-        }
-
-        async function connectToTrainer() {
-            try {
-                const device = await navigator.bluetooth.requestDevice({
-                    filters: [{ services: [CYCLING_POWER_SERVICE] }]
-                });
-
-                document.getElementById('connectButton').textContent = 'Connecting...';
-
-                const server = await device.gatt.connect();
-                const service = await server.getPrimaryService(CYCLING_POWER_SERVICE);
-                const characteristic = await service.getCharacteristic(CYCLING_POWER_MEASUREMENT);
-
-                document.getElementById('connectButton').disabled = true;
-                document.getElementById('connectButton').textContent = 'Connected';
-
-                // Listen for power measurements
-                await characteristic.startNotifications();
-                characteristic.addEventListener('characteristicvaluechanged', (event) => {
-                    const power = parsePower(event.target.value);
-                    movementController.onCyclingPower(power);
-                });
-
-            } catch (error) {
-                console.error(error);
-                document.getElementById('connectButton').textContent = `Error: ${error.message}`;
-            }
         }
 
         init();
