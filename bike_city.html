@@ -52,6 +52,19 @@
         let startTime = 0;
         let elapsedTime = 0;
 
+        function loadSkybox() {
+            const loader = new THREE.CubeTextureLoader();
+            loader.setPath('static/textures/skybox/');
+            
+            const textureCube = loader.load([
+                'px.jpg', 'nx.jpg',  // positive x, negative x
+                'py.jpg', 'ny.jpg',  // positive y, negative y
+                'pz.jpg', 'nz.jpg'   // positive z, negative z
+            ]);
+            
+            scene.background = textureCube;
+        }
+
         function init() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -60,6 +73,9 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setClearColor(0xf0f0f0);
             document.getElementById('container').appendChild(renderer.domElement);
+
+            // Load skybox
+            loadSkybox();
 
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
