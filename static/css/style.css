@@ -61,3 +61,54 @@ body { margin: 0; }
     background: #4CAF50;
     transition: width 0.3s ease;
 }
+.control-btn {
+    padding: 45px 90px;
+    font-size: 24px;
+    border: none;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+.stats-container {
+    gap: 20px;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    color: white;
+    z-index: 1000;
+}
+#turnLeft {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    z-index: 1000;
+}
+#turnRight {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 1000;
+}
+#fullscreenBtn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    padding: 15px;
+    font-size: 24px;
+}
+#shoot {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+.shoot-btn.active {
+    background: rgba(255, 0, 0, 0.2);
+}
