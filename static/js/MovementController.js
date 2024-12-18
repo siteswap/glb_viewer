@@ -3,7 +3,7 @@ import * as THREE from 'three';
 export class MovementController {
     constructor(camera) {
         this.camera = camera;
-        this.moveSpeed = 2.0;
+        this.moveSpeed = 2.0; // meters per second
         this.speedMultiplier = 1.0;
         this.verticalOffset = 1.0;
         this.rotationAngle = Math.PI / 90; // Amount to rotate per frame when held
@@ -100,8 +100,8 @@ export class MovementController {
 
     onCyclingPower(watts) {
         this.moveForward = watts > 5;
-        this.moveSpeed = watts / 100;
-        this.verticalSpeed = (watts - 200) / 100;
+        this.moveSpeed = watts / 80;  // For realistic bike speeds, the divisor would be more like 20.
+        this.verticalSpeed = (watts - 200) / 80;
     }
 
     updateRotation() {
