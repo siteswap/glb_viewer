@@ -71,8 +71,8 @@
         <button class="control-btn" id="fullscreenBtn"><i class="fas fa-expand"></i></button>
         <div class="stats-container">
             <button id="connectButton">Connect</button>
-            <div id="scoreDisplay">0</div>
-            <div id="powerDisplay"><span id="powerValue">0</span>W</div>
+            <div id="scoreDisplay"><span id="scoreValue">0</span> Rings</div>
+            <div id="powerDisplay"><span id="powerValue">0</span> Watts</div>
             <div id="timerDisplay">0:00</div>
         </div>
         <button class="control-btn shoot-btn" id="shoot"><i class="fas fa-crosshairs"></i></button>
@@ -289,7 +289,7 @@
             const deltaTime = clock.getDelta();
             
             detectCollisions(deltaTime);
-            document.getElementById('scoreDisplay').textContent = `S: ${score}`;
+            document.getElementById('scoreValue').textContent = score;
             document.getElementById('powerValue').textContent = movementController.watts;
             updateTimer();
 
