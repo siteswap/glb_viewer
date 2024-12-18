@@ -8,23 +8,24 @@ TIP: A common guideline is to aim for modules under 300–500 lines of code
 
 
 TODO:
-	1) Add a wandering dinosaur (later can shoot it)
-
-
-	---------------------------
-	1) Move the white console out of the way (top left for score & power)
+	1) Check efficiency of current physics. Profile the code.
+	----------------------------
+	Can create different levels just by changing the set up and ring placement. 
+	E.g. 
+		All flyMode, place rings at random heights in the air.
+		All rings on roofs
+		Time Trial - Respawn rings, max rings in 20 mins.
+		Night time - can Three.js add this to existing scene?
+		Time Trial - Get around the city loop in min time (rings show you the route).
+	----------------------------
 	Productionize & monetize asap
 		- Stripe (ad-free, $1 / month)
 		- Ad-sense 
-	1) Question - distance check efficiency? Ask GPT.
 	---- Phase - progression ----
-	1) MONSTERS that follow you
-	1) Re-spawn rings if all found
-	1) Different weapon modules (that get dropped after X many rings found):
-		Longer range
-		Double blaster
-		Huge radius blaster
+	1) Pickups for changing guns/speed/fly
+	1) MONSTERS that follow you - expensive in Three.js with current physics
 	---- Phase IV  ----
+	This kind of stuff is well supported in Unity
 	1) Host a central server with websocket/json updates 
 	2) Multi-player: access from desktop & ipad at same time.
 		- Be a second rider
@@ -35,9 +36,7 @@ TODO:
 All the common FPV features:
 	Weapons pick ups
 	Monsters chase / shoot
-
 	Buy improvements / customisations
-	Level progression - need blender progress 
 	Big boss
 	Online multiplayer arena
 		
