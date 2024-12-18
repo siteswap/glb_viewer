@@ -16,7 +16,6 @@
             touch-action: manipulation;
         }
         .stats-container {
-            display: flex;
             gap: 20px;
             position: fixed;
             top: 20px;
@@ -71,10 +70,10 @@
         <button class="control-btn" id="turnRight"><i class="fas fa-arrow-right"></i></button>
         <button class="control-btn" id="fullscreenBtn"><i class="fas fa-expand"></i></button>
         <div class="stats-container">
+            <button id="connectButton">Connect</button>
             <div id="scoreDisplay">0</div>
             <div id="powerDisplay"><span id="powerValue">0</span>W</div>
             <div id="timerDisplay">0:00</div>
-            <button id="connectButton">Connect</button>
         </div>
         <button class="control-btn shoot-btn" id="shoot"><i class="fas fa-crosshairs"></i></button>
     </div>
